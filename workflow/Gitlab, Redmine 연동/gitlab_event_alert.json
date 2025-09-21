@@ -1,0 +1,1456 @@
+{
+  "name": "gitlab_event_alert",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.before === \"0000000000000000000000000000000000000000\" && $json.body.ref.startsWith('refs/heads/') }}",
+                    "rightValue": "true",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "239b6b2f-6cf7-4af0-9fa1-504ed93c2534"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0cfd9b9d-ab07-44f6-8c69-c7d5cc05eb5a",
+                    "leftValue": "={{ $json.body.object_kind === 'push' && $json.body.before !== \"0000000000000000000000000000000000000000\" }}",
+                    "rightValue": "\"true\"",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ccb45eb7-d83f-48ca-970c-d4b76e955a9d",
+                    "leftValue": "={{ $json.body.object_kind === 'merge_request' && $json.body.before !== \"0000000000000000000000000000000000000000\" }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7f5c06bf-7c1f-425a-85b5-0ac0bc44fbcc",
+                    "leftValue": "={{ !(   ($json.body.before === \"0000000000000000000000000000000000000000\" && $json.body.ref.startsWith('refs/heads/')) ||   ($json.body.object_kind === 'push' && $json.body.before !== \"0000000000000000000000000000000000000000\") ||   ($json.body.object_kind === 'merge_request' && $json.body.before !== \"0000000000000000000000000000000000000000\") ) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -288,
+        0
+      ],
+      "id": "b4c90f87-eec1-4c5d-92a8-0912a650c654",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "project-name",
+              "name": "project_name",
+              "value": "={{ $json.body.project.name }}",
+              "type": "string"
+            },
+            {
+              "id": "project-url",
+              "name": "project_url",
+              "value": "={{ $json.body.project.web_url }}",
+              "type": "string"
+            },
+            {
+              "id": "user-name",
+              "name": "user_name",
+              "value": "={{ $json.body.user_username }}",
+              "type": "string"
+            },
+            {
+              "id": "branch",
+              "name": "branch",
+              "value": "={{ $json.body.ref ? $json.body.ref.replace('refs/heads/', '') : 'unknown' }}",
+              "type": "string"
+            },
+            {
+              "id": "commit-count",
+              "name": "commit_count",
+              "value": "={{ $json.body.total_commits_count || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "commits",
+              "name": "commits",
+              "value": "={{ $json.body.commits || [] }}",
+              "type": "array"
+            },
+            {
+              "id": "event-type",
+              "name": "event_type",
+              "value": "={{ $json.body.object_kind }}",
+              "type": "string"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp",
+              "value": "={{ new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "df88d139-f105-41b3-86f8-1992c4b7ccc4",
+      "name": "Process Push Event1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1056,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0474e0f5-0c66-43c4-9339-11cc4f1499c5",
+              "leftValue": "={{ $json.body.commits.some(commit => commit.message?.includes(\"Test\") || commit.message?.includes(\"test\")) ? \"true\" : \"false\" }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        32
+      ],
+      "id": "49247c9b-500d-49bc-a134-0c3c7b4474d1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "qkdduddn@naver.com",
+        "toEmail": "qkdduddn@naver.com",
+        "subject": "={{ $json.email_subject }}",
+        "text": "=",
+        "html": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "name": "Send Naver Mail1",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        2144,
+        -192
+      ],
+      "id": "7ec3052c-5902-4bb3-8a19-002986124aa3",
+      "credentials": {
+        "smtp": {
+          "id": "DNNOWCKiUAWtJFCG",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "D098NQCKG3G",
+          "mode": "id"
+        },
+        "text": "={{ $json.body.user_username }} 님이 {{ $json.body.ref ? $json.body.ref.replace('refs/heads/', '') : 'unknown' }} 브랜치를 생성하였습니다.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        432,
+        -240
+      ],
+      "id": "58a92019-0ab2-4085-ada5-b05d79572448",
+      "name": "브랜치 생성 알람",
+      "webhookId": "39c2429d-ac73-4b5f-8ec5-852c9d976ad6",
+      "credentials": {
+        "slackApi": {
+          "id": "Ych1W8Auy2LsCajx",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "email-subject",
+              "name": "email_subject",
+              "value": "={{'[GitLab] ' + $json.user_name + '님이 ' + $json.project_name + '에 Push했습니다' }}",
+              "type": "string"
+            },
+            {
+              "id": "email-body",
+              "name": "email_body",
+              "value": "={{\n'<h3>[GitLab] Push 알림</h3>' +\n'<p><strong>프로젝트:</strong> ' + $json.project_name + '</p>' +\n'<p><strong>사용자:</strong> ' + $json.user_name + '</p>' +\n'<p><strong>브랜치명:</strong> ' + $json.branch + '</p>' +\n'<p><strong>커밋 수:</strong> ' + $json.commit_count + '</p>' +\n'<p><strong>시간:</strong> ' + $json.timestamp + '</p>' +\n'<h4>최근 커밋:</h4>' +\n($json.commits && $json.commits[0] ? \n'<ul><li><strong>' + $json.commits[0].author.name + ':</strong> ' +\n$json.commits[0].message.trim() + '<br>' +\n'<code>' + $json.commits[0].id.substring(0, 8) + '</code></li></ul>' \n: \n'<p><em>커밋 정보 없음</em></p>'\n)\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5cac8afc-e747-4871-9256-e6c95d8889c9",
+      "name": "Prepare Email Content1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "project-name-mr",
+              "name": "project_name",
+              "value": "={{ $json.body.project.name }}",
+              "type": "string"
+            },
+            {
+              "id": "project-url-mr",
+              "name": "project_url",
+              "value": "={{ $json.body.project.web_url }}",
+              "type": "string"
+            },
+            {
+              "id": "user-name-mr",
+              "name": "user_name",
+              "value": "={{ $json.body.user.username }}",
+              "type": "string"
+            },
+            {
+              "id": "mr-title",
+              "name": "mr_title",
+              "value": "={{ $json.body.object_attributes.title }}",
+              "type": "string"
+            },
+            {
+              "id": "mr-action",
+              "name": "mr_action",
+              "value": "={{ $json.body.object_attributes.action }}",
+              "type": "string"
+            },
+            {
+              "id": "mr-url",
+              "name": "mr_url",
+              "value": "={{ $json.body.object_attributes.url.replace('http://git.evolvesoft.duckdns.org', 'https://git.evolvelab.co.kr') }}",
+              "type": "string"
+            },
+            {
+              "id": "source-branch",
+              "name": "source_branch",
+              "value": "={{ $json.body.object_attributes.source_branch }}",
+              "type": "string"
+            },
+            {
+              "id": "target-branch",
+              "name": "target_branch",
+              "value": "={{ $json.body.object_attributes.target_branch }}",
+              "type": "string"
+            },
+            {
+              "id": "event-type-mr",
+              "name": "event_type",
+              "value": "merge_request",
+              "type": "string"
+            },
+            {
+              "id": "timestamp-mr",
+              "name": "timestamp",
+              "value": "={{ new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d7811cc2-c161-4b2b-b5e4-7fa622e02bbe",
+      "name": "Process Merge Request1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "other-email-subject",
+              "name": "email_subject",
+              "value": "={{ '[GitLab] ' + $json.project_name + ' - ' + $json.event_type + ' 이벤트' }}",
+              "type": "string"
+            },
+            {
+              "id": "other-email-body",
+              "name": "email_body",
+              "value": "='<h2>GitLab 이벤트 알림</h2>' +\n'<p><strong>프로젝트:</strong> ' + $json.project_name + '</p>' +\n'<p><strong>사용자:</strong> ' + $json.user_name + '</p>' +\n'<p><strong>이벤트 타입:</strong> ' + $json.event_type + '</p>' +\n'<p><strong>시간:</strong> ' + $json.timestamp + '</p>' +\n'<br>' +\n'<h3>원시 데이터:</h3>' +\n'<pre style=\"background-color: #f5f5f5; padding: 10px; border-radius: 5px;\">' + \n$json.raw_data + '</pre>'",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1646048-8f0e-4495-b61b-712796f5638b",
+      "name": "Prepare Other Event Email1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "default-project-name",
+              "name": "project_name",
+              "value": "={{ $json.body.project ? $json.body.project.name : 'Unknown Project' }}",
+              "type": "string"
+            },
+            {
+              "id": "default-user-name",
+              "name": "user_name",
+              "value": "={{ $json.body.user_username || 'Unknown User' }}",
+              "type": "string"
+            },
+            {
+              "id": "default-event-type",
+              "name": "event_type",
+              "value": "={{ $json.body.object_kind || 'unknown' }}",
+              "type": "string"
+            },
+            {
+              "id": "default-timestamp",
+              "name": "timestamp",
+              "value": "={{ new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) }}",
+              "type": "string"
+            },
+            {
+              "id": "raw-data",
+              "name": "raw_data",
+              "value": "={{ JSON.stringify($json, null, 2) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0ee305bd-d63c-4592-9d13-a1e4dc3e37f5",
+      "name": "Process Other Events1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ffff86b3-86f0-48a3-8904-7acd9d65f4a9",
+              "leftValue": "={{ $json.body.object_attributes.action }}",
+              "rightValue": "merge",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        384
+      ],
+      "id": "1308e937-320f-4d7e-b662-78f7abccefc2",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "205148ca-1ddc-47d5-aa0c-4ebb59b38ee8",
+              "leftValue": "={{ $json.body.object_attributes.action }}",
+              "rightValue": "open",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        592
+      ],
+      "id": "165fde8d-8b06-4a97-8d3f-9177202b5cdf",
+      "name": "Open Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "project-name-mr",
+              "name": "project_name",
+              "value": "={{ $json.body.project.name }}",
+              "type": "string"
+            },
+            {
+              "id": "project-url-mr",
+              "name": "project_url",
+              "value": "={{ $json.body.project.web_url }}",
+              "type": "string"
+            },
+            {
+              "id": "user-name-mr",
+              "name": "user_name",
+              "value": "={{ $json.body.user.username }}",
+              "type": "string"
+            },
+            {
+              "id": "mr-title",
+              "name": "mr_title",
+              "value": "={{ $json.body.object_attributes.title }}",
+              "type": "string"
+            },
+            {
+              "id": "mr-action",
+              "name": "mr_action",
+              "value": "={{ $json.body.object_attributes.action }}",
+              "type": "string"
+            },
+            {
+              "id": "mr-url",
+              "name": "mr_url",
+              "value": "={{ $json.body.object_attributes.url.replace('http://git.evolvesoft.duckdns.org', 'https://git.evolvelab.co.kr') }} ",
+              "type": "string"
+            },
+            {
+              "id": "source-branch",
+              "name": "source_branch",
+              "value": "={{ $json.body.object_attributes.source_branch }}",
+              "type": "string"
+            },
+            {
+              "id": "target-branch",
+              "name": "target_branch",
+              "value": "={{ $json.body.object_attributes.target_branch }}",
+              "type": "string"
+            },
+            {
+              "id": "event-type-mr",
+              "name": "event_type",
+              "value": "merge_request",
+              "type": "string"
+            },
+            {
+              "id": "timestamp-mr",
+              "name": "timestamp",
+              "value": "={{ new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d9c74676-9834-4c2c-85d4-236f0c6c0df4",
+      "name": "Process Merge Request",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "email-subject",
+              "name": "email_subject",
+              "value": "={{'[GitLab] ' + $json.user_name + '님이 ' + $json.project_name + '에 Merge 작업을 진행했습니다' }}",
+              "type": "string"
+            },
+            {
+              "id": "email-body",
+              "name": "email_body",
+              "value": "={{\n'<h3>[GitLab] Merge Request 알림</h3>' +\n'<p><strong>프로젝트:</strong> ' + $json.project_name + '</p>' +\n'<p><strong>사용자:</strong> ' + $json.user_name + '</p>' +\n'<p><strong>제목:</strong> ' + $json.mr_title + '</p>' +\n'<p><strong>액션:</strong> ' + $json.mr_action + '</p>' +\n'<p><strong>소스 브랜치:</strong> ' + $json.source_branch + '</p>' +\n'<p><strong>타겟 브랜치:</strong> ' + $json.target_branch + '</p>' +\n'<p><strong>시간:</strong> ' + $json.timestamp + '</p>' +\n'<p><a href=\"' + $json.mr_url + '\">Merge Request 보기</a></p>'\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "aecb58a6-0587-4580-98d8-0486637ff1ec",
+      "name": "Prepare Email Content",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1168,
+        240
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        32
+      ],
+      "id": "3e407c65-3ea1-458d-9541-a439d07cfad3",
+      "name": "GitLab_event_alert 및 redmine 연동"
+    },
+    {
+      "parameters": {
+        "fromEmail": "qkdduddn@naver.com",
+        "toEmail": "qkdduddn@naver.com",
+        "subject": "={{ $json.email_subject }}",
+        "text": "=",
+        "html": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "name": "Send Naver Mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        368
+      ],
+      "id": "48e71d02-9bac-4ceb-8836-c72816baefe1",
+      "credentials": {
+        "smtp": {
+          "id": "DNNOWCKiUAWtJFCG",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "email-subject",
+              "name": "email_subject",
+              "value": "={{'[GitLab] ' + $json.user_name + '님이 ' + $json.project_name + '에 Merge 작업을 요청하였습니다.' }}",
+              "type": "string"
+            },
+            {
+              "id": "email-body",
+              "name": "email_body",
+              "value": "={{\n'<h3>[GitLab] Merge Request 알림</h3>' +\n'<p><strong>프로젝트:</strong> ' + $json.project_name + '</p>' +\n'<p><strong>사용자:</strong> ' + $json.user_name + '</p>' +\n'<p><strong>제목:</strong> ' + $json.mr_title + '</p>' +\n'<p><strong>액션:</strong> ' + $json.mr_action + '</p>' +\n'<p><strong>소스 브랜치:</strong> ' + $json.source_branch + '</p>' +\n'<p><strong>타겟 브랜치:</strong> ' + $json.target_branch + '</p>' +\n'<p><strong>시간:</strong> ' + $json.timestamp + '</p>' +\n'<p><a href=\"' + $json.mr_url + '\">Merge Request 보기</a></p>'\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4542f7be-243a-4b27-ab6e-e9e4340ca161",
+      "name": "Prepare Email Content2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1216,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09D0BU6UBB",
+          "mode": "id"
+        },
+        "text": "={{'[GitLab] ' + ($node[\"Process Push Event\"].json.user_name || 'N/A') + '님이 ' + ($node[\"Process Push Event\"].json.project_name || 'N/A') + '에 Push했습니다' }}\n\n{{ \n'*[GitLab] Push 알림*\\n' +\n'*프로젝트:* ' + $node[\"Process Push Event\"].json.project_name + '\\n' +\n'*사용자:* ' + $node[\"Process Push Event\"].json.user_name + '\\n' +\n'*브랜치명:* ' + $node[\"Process Push Event\"].json.branch + '\\n' +\n'*커밋 수:* ' + $node[\"Process Push Event\"].json.commit_count + '\\n' +\n'*시간:* ' + $node[\"Process Push Event\"].json.timestamp + '\\n\\n' +\n'*최근 커밋:*\\n' +\n($node[\"Process Push Event\"].json.commits && $node[\"Process Push Event\"].json.commits.length > 0 ? \n  '• *' + $node[\"Process Push Event\"].json.commits[0].author.name + '*: ' + $node[\"Process Push Event\"].json.commits[0].message.trim() + '\\n' +\n  '  `' + $node[\"Process Push Event\"].json.commits[0].id.substring(0, 8) + '`' :\n  '_커밋 정보 없음_'\n)\n}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1392,
+        16
+      ],
+      "id": "22385d58-244b-47f6-8770-3e6af6471a26",
+      "name": "n8n_gitlab_push_event_alret",
+      "webhookId": "39c2429d-ac73-4b5f-8ec5-852c9d976ad6",
+      "credentials": {
+        "slackApi": {
+          "id": "Ych1W8Auy2LsCajx",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09CR0HLWF6",
+          "mode": "id"
+        },
+        "text": "={{'[GitLab] ' + ($node[\"Process Merge Request1\"].json.user_name || 'N/A') + '님이 ' + ($node[\"Process Merge Request1\"].json.project_name || 'N/A') + '에 Merge 작업을 진행했습니다' }}\n\n{{ \n'*[GitLab] Merge Request 알림*\\n' +\n'*프로젝트:* ' + $node[\"Process Merge Request1\"].json.project_name + '\\n' +\n'*사용자:* ' + $node[\"Process Merge Request1\"].json.user_name + '\\n' +\n'*제목:* ' + $node[\"Process Merge Request1\"].json.mr_title + '\\n' +\n'*액션:* ' + $node[\"Process Merge Request1\"].json.mr_action + '\\n' +\n'*소스 브랜치:* ' + $node[\"Process Merge Request1\"].json.source_branch + '\\n' +\n'*타겟 브랜치:* ' + $node[\"Process Merge Request1\"].json.target_branch + '\\n' +\n'*시간:* ' + $node[\"Process Merge Request1\"].json.timestamp + '\\n\\n' +\n'<'+ $node[\"Process Merge Request1\"].json.mr_url + '|Merge Request 보기>'\n}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1680,
+        160
+      ],
+      "id": "0380c554-5222-41b2-9853-079fb88743b3",
+      "name": "n8n_gitlab_merge_event_alert",
+      "webhookId": "39c2429d-ac73-4b5f-8ec5-852c9d976ad6",
+      "credentials": {
+        "slackApi": {
+          "id": "Ych1W8Auy2LsCajx",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "755793b7-256f-4b3f-bb47-6c501b5aa0c3",
+              "leftValue": "={{ $json.body.object_attributes.action }}",
+              "rightValue": "close",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        896
+      ],
+      "id": "b54ac133-733a-457c-a65b-6bb24c1840f5",
+      "name": "closed Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "project-name-mr",
+              "name": "project_name",
+              "value": "={{ $json.body.project.name }}",
+              "type": "string"
+            },
+            {
+              "id": "project-url-mr",
+              "name": "project_url",
+              "value": "={{ $json.body.project.web_url }}",
+              "type": "string"
+            },
+            {
+              "id": "user-name-mr",
+              "name": "user_name",
+              "value": "={{ $json.body.user.username }}",
+              "type": "string"
+            },
+            {
+              "id": "mr-title",
+              "name": "mr_title",
+              "value": "={{ $json.body.object_attributes.title }}",
+              "type": "string"
+            },
+            {
+              "id": "mr-action",
+              "name": "mr_action",
+              "value": "={{ $json.body.object_attributes.action }}",
+              "type": "string"
+            },
+            {
+              "id": "mr-url",
+              "name": "mr_url",
+              "value": "={{ $json.body.object_attributes.url.replace('http://git.evolvesoft.duckdns.org', 'https://git.evolvelab.co.kr') }} ",
+              "type": "string"
+            },
+            {
+              "id": "source-branch",
+              "name": "source_branch",
+              "value": "={{ $json.body.object_attributes.source_branch }}",
+              "type": "string"
+            },
+            {
+              "id": "target-branch",
+              "name": "target_branch",
+              "value": "={{ $json.body.object_attributes.target_branch }}",
+              "type": "string"
+            },
+            {
+              "id": "event-type-mr",
+              "name": "event_type",
+              "value": "merge_request",
+              "type": "string"
+            },
+            {
+              "id": "timestamp-mr",
+              "name": "timestamp",
+              "value": "={{ new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "400b2389-7ae1-491e-95fb-1c1f0a6c8cb2",
+      "name": "Process Merge Request2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1136,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "email-subject",
+              "name": "email_subject",
+              "value": "={{'[GitLab] ' + $json.user_name + '님이 ' + $json.project_name + '에 Merge 요청을 취소하였습니다.' }}",
+              "type": "string"
+            },
+            {
+              "id": "email-body",
+              "name": "email_body",
+              "value": "={{\n'<h3>[GitLab] Merge Request 알림</h3>' +\n'<p><strong>프로젝트:</strong> ' + $json.project_name + '</p>' +\n'<p><strong>사용자:</strong> ' + $json.user_name + '</p>' +\n'<p><strong>제목:</strong> ' + $json.mr_title + '</p>' +\n'<p><strong>액션:</strong> ' + $json.mr_action + '</p>' +\n'<p><strong>소스 브랜치:</strong> ' + $json.source_branch + '</p>' +\n'<p><strong>타겟 브랜치:</strong> ' + $json.target_branch + '</p>' +\n'<p><strong>시간:</strong> ' + $json.timestamp + '</p>' +\n'<p><a href=\"' + $json.mr_url + '\">Merge Request 보기</a></p>'\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2bb327de-8c0f-4402-bc17-a51287712da6",
+      "name": "Prepare Email Content3",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1456,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "project-name",
+              "name": "project_name",
+              "value": "={{ $json.body.project.name }}",
+              "type": "string"
+            },
+            {
+              "id": "project-url",
+              "name": "project_url",
+              "value": "={{ $json.body.project.web_url }}",
+              "type": "string"
+            },
+            {
+              "id": "user-name",
+              "name": "user_name",
+              "value": "={{ $json.body.user_username }}",
+              "type": "string"
+            },
+            {
+              "id": "branch",
+              "name": "branch",
+              "value": "={{ $json.body.ref ? $json.body.ref.replace('refs/heads/', '') : 'unknown' }}",
+              "type": "string"
+            },
+            {
+              "id": "commit-count",
+              "name": "commit_count",
+              "value": "={{ $json.body.total_commits_count || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "commits",
+              "name": "commits",
+              "value": "={{ $json.body.commits || [] }}",
+              "type": "array"
+            },
+            {
+              "id": "event-type",
+              "name": "event_type",
+              "value": "={{ $json.body.object_kind }}",
+              "type": "string"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp",
+              "value": "={{ new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f11ed7bf-0908-4fd3-904d-b82db1f4e3b0",
+      "name": "Process Push Event",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1056,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "qkdduddn@naver.com",
+        "toEmail": "qkdduddn@naver.com",
+        "subject": "={{ $json.email_subject }}",
+        "text": "=",
+        "html": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "name": "Send Naver Mail2",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        784
+      ],
+      "id": "e842195f-4d09-4647-9d2a-595bfa3ca066",
+      "credentials": {
+        "smtp": {
+          "id": "DNNOWCKiUAWtJFCG",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "user",
+        "operation": "getAll",
+        "returnAll": true
+      },
+      "id": "697e0a25-7e9c-4c18-8923-7d9bfcd1316a",
+      "name": "Get Slack Users",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -368
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "Ych1W8Auy2LsCajx",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const gitlabUserName = $node[\"Process Push Event1\"].json.user_name;\nconst users = items; // Slack 유저 정보 리스트\n\n// 필터링해서 일치하는 유저만 반환\nconst matchedUser = users.find(user => user.json.name === gitlabUserName);\n\nif (matchedUser) {\n  return [matchedUser]; // 배열로 감싸서 반환\n} else {\n  return []; // 일치하는 사용자 없음\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1888,
+        -368
+      ],
+      "id": "6a54c30c-7504-45d2-9cb4-de291a90ce58",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{$node[\"Code\"].json.id}}",
+          "mode": "id"
+        },
+        "text": "={{'[GitLab] ' + ($node[\"Process Push Event1\"].json.user_name || 'N/A') + '님이 ' + ($node[\"Process Push Event1\"].json.project_name || 'N/A') + '에 Push했습니다' }}\n\n{{ \n'*[GitLab] Push 알림*\\n' +\n'*프로젝트:* ' + $node[\"Process Push Event1\"].json.project_name + '\\n' +\n'*사용자:* ' + $node[\"Process Push Event1\"].json.user_name + '\\n' +\n'*브랜치명:* ' + $node[\"Process Push Event1\"].json.branch + '\\n' +\n'*커밋 수:* ' + $node[\"Process Push Event1\"].json.commit_count + '\\n' +\n'*시간:* ' + $node[\"Process Push Event1\"].json.timestamp + '\\n\\n' +\n'*최근 커밋:*\\n' +\n($node[\"Process Push Event1\"].json.commits && $node[\"Process Push Event1\"].json.commits.length > 0 ? \n  '• *' + $node[\"Process Push Event1\"].json.commits[0].author.name + '*: ' + $node[\"Process Push Event1\"].json.commits[0].message.trim() + '\\n' +\n  '  `' + $node[\"Process Push Event1\"].json.commits[0].id.substring(0, 8) + '`' :\n  '_커밋 정보 없음_'\n)\n}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2144,
+        -368
+      ],
+      "id": "eac4708a-5dbc-432b-8d44-28e1f62c9499",
+      "name": "본인에게 메세지 전달1",
+      "webhookId": "39c2429d-ac73-4b5f-8ec5-852c9d976ad6",
+      "credentials": {
+        "slackApi": {
+          "id": "Ych1W8Auy2LsCajx",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "user",
+        "operation": "getAll",
+        "returnAll": true
+      },
+      "id": "870c5bce-8224-433e-bee2-81243bfe5762",
+      "name": "Get Slack Users1",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        576
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "Ych1W8Auy2LsCajx",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const gitlabUserName = $node[\"Process Merge Request\"].json.user_name;\nconst users = items; // Slack 유저 정보 리스트\n\n// 필터링해서 일치하는 유저만 반환\nconst matchedUser = users.find(user => user.json.name === gitlabUserName);\n\nif (matchedUser) {\n  return [matchedUser]; // 배열로 감싸서 반환\n} else {\n  return []; // 일치하는 사용자 없음\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        576
+      ],
+      "id": "97e74528-93f0-4a59-9bdc-064083d58a5a",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{$node[\"Code1\"].json.id}}",
+          "mode": "id"
+        },
+        "text": "={{'[GitLab] ' + ($node[\"Process Merge Request\"].json.user_name || 'N/A') + '님이 ' + ($node[\"Process Merge Request\"].json.project_name || 'N/A') + '에 Merge 작업을 요청하였습니다' }}\n\n{{ \n'*[GitLab] Merge Request 알림*\\n' +\n'*프로젝트:* ' + $node[\"Process Merge Request\"].json.project_name + '\\n' +\n'*사용자:* ' + $node[\"Process Merge Request\"].json.user_name + '\\n' +\n'*제목:* ' + $node[\"Process Merge Request\"].json.mr_title + '\\n' +\n'*액션:* ' + $node[\"Process Merge Request\"].json.mr_action + '\\n' +\n'*소스 브랜치:* ' + $node[\"Process Merge Request\"].json.source_branch + '\\n' +\n'*타겟 브랜치:* ' + $node[\"Process Merge Request\"].json.target_branch + '\\n' +\n'*시간:* ' + $node[\"Process Merge Request\"].json.timestamp + '\\n\\n' +\n'<'+ $node[\"Process Merge Request\"].json.mr_url + '|Merge Request 보기>'\n}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2096,
+        576
+      ],
+      "id": "a1772361-1464-4e8c-aebc-d33a1f840ab8",
+      "name": "본인에게 메세지 전달",
+      "webhookId": "39c2429d-ac73-4b5f-8ec5-852c9d976ad6",
+      "credentials": {
+        "slackApi": {
+          "id": "Ych1W8Auy2LsCajx",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "qkdduddn@naver.com",
+        "toEmail": "qkdduddn@naver.com",
+        "subject": "={{ $json.email_subject }}",
+        "text": "=",
+        "html": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "name": "Send Naver Mail3",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        1184
+      ],
+      "id": "ccb106b4-e2d4-4070-a6c3-40649f6fd2ff",
+      "credentials": {
+        "smtp": {
+          "id": "DNNOWCKiUAWtJFCG",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09CJH582G5",
+          "mode": "id"
+        },
+        "text": "={{'[GitLab] ' + ($node[\"Process Merge Request2\"].json.user_name || 'N/A') + '님이 ' + ($node[\"Process Merge Request2\"].json.project_name || 'N/A') + '에 Merge 요청을 취소하였습니다' }}\n\n{{ \n'*[GitLab] Merge Request 알림*\\n' +\n'*프로젝트:* ' + $node[\"Process Merge Request2\"].json.project_name + '\\n' +\n'*사용자:* ' + $node[\"Process Merge Request2\"].json.user_name + '\\n' +\n'*제목:* ' + $node[\"Process Merge Request2\"].json.mr_title + '\\n' +\n'*액션:* ' + $node[\"Process Merge Request2\"].json.mr_action + '\\n' +\n'*소스 브랜치:* ' + $node[\"Process Merge Request2\"].json.source_branch + '\\n' +\n'*타겟 브랜치:* ' + $node[\"Process Merge Request2\"].json.target_branch + '\\n' +\n'*시간:* ' + $node[\"Process Merge Request2\"].json.timestamp + '\\n\\n' +\n'<'+ $node[\"Process Merge Request2\"].json.mr_url + '|Merge Request 보기>'\n}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1792,
+        976
+      ],
+      "id": "9fdc9b89-8bbf-4e07-96b7-58dbdd18a318",
+      "name": "n8n_gitlab_merger_request_alert1",
+      "webhookId": "39c2429d-ac73-4b5f-8ec5-852c9d976ad6",
+      "credentials": {
+        "slackApi": {
+          "id": "Ych1W8Auy2LsCajx",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09CJH582G5",
+          "mode": "id"
+        },
+        "text": "={{'[GitLab] ' + ($node[\"Process Merge Request\"].json.user_name || 'N/A') + '님이 ' + ($node[\"Process Merge Request\"].json.project_name || 'N/A') + '에 Merge 작업을 요청하였습니다' }}\n\n{{ \n'*[GitLab] Merge Request 알림*\\n' +\n'*프로젝트:* ' + $node[\"Process Merge Request\"].json.project_name + '\\n' +\n'*사용자:* ' + $node[\"Process Merge Request\"].json.user_name + '\\n' +\n'*제목:* ' + $node[\"Process Merge Request\"].json.mr_title + '\\n' +\n'*액션:* ' + $node[\"Process Merge Request\"].json.mr_action + '\\n' +\n'*소스 브랜치:* ' + $node[\"Process Merge Request\"].json.source_branch + '\\n' +\n'*타겟 브랜치:* ' + $node[\"Process Merge Request\"].json.target_branch + '\\n' +\n'*시간:* ' + $node[\"Process Merge Request\"].json.timestamp + '\\n\\n' +\n'<'+ $node[\"Process Merge Request\"].json.mr_url + '|Merge Request 보기>'\n}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2464,
+        720
+      ],
+      "id": "f356cc57-e8cc-43e5-83d9-bc21e6bdb6ea",
+      "name": "n8n_gitlab_merger_request_alert",
+      "webhookId": "39c2429d-ac73-4b5f-8ec5-852c9d976ad6",
+      "credentials": {
+        "slackApi": {
+          "id": "Ych1W8Auy2LsCajx",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "브랜치 생성 알람",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Process Push Event1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Process Push Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Push Event1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Content1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Naver Mail1": {
+      "main": [
+        []
+      ]
+    },
+    "Prepare Email Content1": {
+      "main": [
+        [
+          {
+            "node": "Send Naver Mail1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Slack Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Merge Request1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Other Events1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Other Event Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Other Event Email1": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Process Merge Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Open Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open Merge": {
+      "main": [
+        [
+          {
+            "node": "Process Merge Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "closed Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Content": {
+      "main": [
+        [
+          {
+            "node": "Send Naver Mail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "n8n_gitlab_merge_event_alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitLab_event_alert 및 redmine 연동": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Content2": {
+      "main": [
+        [
+          {
+            "node": "Send Naver Mail2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Slack Users1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Merge Request": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Content2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Merge Request2": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Content3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "closed Merge": {
+      "main": [
+        [
+          {
+            "node": "Process Merge Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Content3": {
+      "main": [
+        []
+      ]
+    },
+    "Process Push Event": {
+      "main": [
+        [
+          {
+            "node": "n8n_gitlab_push_event_alret",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Slack Users": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "본인에게 메세지 전달1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Slack Users1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "본인에게 메세지 전달",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5ec57df8-f87f-4343-b48f-14deba1fc445",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d2514d9cc26a3c03488683bfe3511d5230646815a03749f5f7f6b55087126ab1"
+  },
+  "id": "RKCAyP9jyei9p9Xy",
+  "tags": []
+}

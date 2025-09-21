@@ -1,0 +1,307 @@
+{
+  "name": "Latest_IT_article",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://www.itworld.co.kr/feed/",
+        "options": {}
+      },
+      "name": "RSS Read",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [
+        -1296,
+        1920
+      ],
+      "id": "a2e84e11-d1b7-4d92-80b5-ca3f7032dcab",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "name": "Limit",
+      "type": "n8n-nodes-base.limit",
+      "position": [
+        -1104,
+        1920
+      ],
+      "id": "ca5cfe09-f424-4a5a-9001-9836dd1382a8",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "title",
+              "renameField": true,
+              "outputFieldName": "제목"
+            },
+            {
+              "fieldToAggregate": "link",
+              "renameField": true,
+              "outputFieldName": "링크"
+            },
+            {
+              "fieldToAggregate": "content",
+              "renameField": true,
+              "outputFieldName": "내용"
+            },
+            {
+              "fieldToAggregate": "pubDate",
+              "renameField": true,
+              "outputFieldName": "발행일"
+            },
+            {
+              "fieldToAggregate": "categories",
+              "renameField": true,
+              "outputFieldName": "카테고리"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        -896,
+        1920
+      ],
+      "id": "0a36b23e-aaaf-486b-9aeb-f558c622d637",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=아래는 실제 RSS 피드에서 가져온 IT 뉴스 기사들입니다. 각 기사를 정확히 3줄로 요약하여 슬랙 메시지 형식으로 만들어주세요.\n\n{{ $json.formatted_articles }}\n\n**중요 지침:**\n1. 위에 제공된 실제 기사 데이터만 사용하세요\n2. 임의로 기사를 생성하거나 변경하지 마세요\n3. 각 기사마다 다음 형식을 정확히 따라주세요:\n\n:gear: [실제 제목]\n:calendar: [실제 발행일] | :label: [실제 카테고리]\n[실제 내용 기반 3줄 요약 - 핵심 내용만]\n:link: <[실제 링크]|원문 보기>\n\n4. 각 기사 사이에는 빈 줄 하나로 구분하세요\n5. 총 {{ $json.article_count }}개 기사를 모두 처리하세요",
+        "options": {
+          "systemMessage": "당신은 전문 IT 뉴스 에디터입니다.\n\n**핵심 규칙:**\n- 반드시 사용자가 제공한 실제 RSS 데이터만 사용\n- 기사를 임의로 생성하거나 내용을 추가하지 말 것\n- 제공된 제목, 링크, 내용을 그대로 활용\n- 내용이 부족하더라도 실제 데이터 범위 내에서만 요약\n- 정확성이 창의성보다 우선\n\n각 기사를 슬랙 메시지 형식으로 깔끔하게 3줄 요약하고, 지정된 이모지를 정확히 사용하세요."
+        }
+      },
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -400,
+        1920
+      ],
+      "id": "b1032673-8d0c-4ec6-b85b-9841859e31e0",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI Agent 출력 처리 개선\nconst items = $input.all();\nlet aiOutput = '';\n\n// AI Agent 출력 찾기 (다양한 구조 대응)\nfor (const item of items) {\n  if (item.json) {\n    // AI Agent 출력 패턴들 확인\n    if (item.json.output) {\n      aiOutput = item.json.output;\n      break;\n    } else if (item.json.text) {\n      aiOutput = item.json.text;\n      break;\n    } else if (typeof item.json === 'string') {\n      aiOutput = item.json;\n      break;\n    } else if (item.json.response) {\n      aiOutput = item.json.response;\n      break;\n    } else {\n      // 객체의 값들 중 가장 긴 문자열 찾기 (AI 출력일 가능성 높음)\n      for (const [key, value] of Object.entries(item.json)) {\n        if (typeof value === 'string' && value.length > 100) {\n          if (value.includes(':gear:') || value.includes('기사') || value.includes('뉴스')) {\n            aiOutput = value;\n            break;\n          }\n        }\n      }\n    }\n  }\n}\n\n// 출력이 없을 경우 디버깅 정보 포함\nif (!aiOutput) {\n  console.log('AI Agent 출력 구조:', JSON.stringify(items, null, 2));\n  aiOutput = `:warning: AI 요약 생성 중 문제가 발생했습니다.\\n입력 구조를 확인해주세요.`;\n}\n\n// 현재 날짜 (한국 시간)\nconst today = new Date().toLocaleDateString('ko-KR', {\n  timeZone: 'Asia/Seoul',\n  year: 'numeric',\n  month: 'numeric', \n  day: 'numeric'\n});\n\n// 최종 슬랙 메시지 구성\nconst finalMessage = `:mega: 오늘의 AI 뉴스 요약 (${today})\\n\\n안녕하세요! IT 뉴스 전문 에디터입니다. 최신 RSS 피드 기사들을 슬랙에서 한눈에 보기 쉽게 요약해 정리했습니다.\\n\\n---\\n\\n${aiOutput}\\n\\n---\\n\\n자동화된 n8n 워크플로우로 생성됨`;\n\nreturn [{\n  json: {\n    slack_message: finalMessage\n  }\n}];"
+      },
+      "name": "Code1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        144,
+        1920
+      ],
+      "id": "d5db2916-517d-4152-aa4f-d6ca3dff6b9f",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        2160
+      ],
+      "id": "4b36a2ae-10c7-494d-a4df-5f1da2b4d44e",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "uriqsTHuzEojy9yT",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09B72E6T0B",
+          "mode": "list",
+          "cachedResultName": "it기사_소식"
+        },
+        "text": "={{ $json.slack_message }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        464,
+        1920
+      ],
+      "id": "d67b5257-c50f-4abf-b964-1cc37e3f0a05",
+      "name": "Slack",
+      "webhookId": "39c2429d-ac73-4b5f-8ec5-852c9d976ad6",
+      "credentials": {
+        "slackApi": {
+          "id": "Ych1W8Auy2LsCajx",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1584,
+        1920
+      ],
+      "id": "83d8fb7d-24bf-467f-b201-a776bdb3b1ca",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate된 데이터를 AI Agent가 이해할 수 있는 형태로 변환\nconst aggregatedData = $input.first().json;\n\n// 각 필드의 배열을 개별 기사 객체로 재구성\nconst articles = [];\nconst articleCount = aggregatedData.제목 ? aggregatedData.제목.length : 0;\n\nfor (let i = 0; i < articleCount; i++) {\n  articles.push({\n    제목: aggregatedData.제목[i] || '',\n    링크: aggregatedData.링크[i] || '',\n    내용: aggregatedData.내용[i] || '',\n    발행일: aggregatedData.발행일[i] || '',\n    카테고리: Array.isArray(aggregatedData.카테고리[i]) ? aggregatedData.카테고리[i].join(', ') : (aggregatedData.카테고리[i] || 'IT/기술')\n  });\n}\n\n// AI Agent에게 전달할 구조화된 텍스트 생성\nlet formattedText = `총 ${articles.length}개의 IT 뉴스 기사:\\n\\n`;\n\narticles.forEach((article, index) => {\n  formattedText += `[기사 ${index + 1}]\\n`;\n  formattedText += `제목: ${article.제목}\\n`;\n  formattedText += `링크: ${article.링크}\\n`;\n  formattedText += `발행일: ${article.발행일}\\n`;\n  formattedText += `카테고리: ${article.카테고리}\\n`;\n  formattedText += `내용: ${article.내용.substring(0, 500)}${article.내용.length > 500 ? '...' : ''}\\n`;\n  formattedText += `---\\n\\n`;\n});\n\nreturn {\n  json: {\n    formatted_articles: formattedText,\n    article_count: articles.length,\n    articles: articles\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -688,
+        1920
+      ],
+      "id": "d07a61ec-b999-4c46-ba61-bd6a513c9ef6",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 21
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1600,
+        2160
+      ],
+      "id": "2c50fba6-e7ed-431b-8507-eaa99322566a",
+      "name": "Schedule Trigger1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3cc73537-14e4-411d-8c77-9f50e48d58c9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d2514d9cc26a3c03488683bfe3511d5230646815a03749f5f7f6b55087126ab1"
+  },
+  "id": "R3mShIY3cx9LjqpW",
+  "tags": []
+}

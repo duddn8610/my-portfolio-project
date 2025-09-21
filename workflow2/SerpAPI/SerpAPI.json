@@ -1,0 +1,182 @@
+{
+  "name": "SerpAPI",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.query }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "ad0c02b1-d864-4a6b-a78d-192a730711c8",
+      "name": "Check Query",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// SerpAPI 응답을 파싱하고 정리하는 함수\nconst serpResponse = $input.first()?.json;\n\nif (!serpResponse || !serpResponse.organic_results) {\n  return {\n    success: false,\n    message: \"검색 결과를 찾을 수 없습니다.\",\n    query: $json.body?.query || \"알 수 없음\"\n  };\n}\n\n// 검색 결과 정리\nconst results = serpResponse.organic_results.slice(0, 3).map(result => ({\n  title: result.title,\n  snippet: result.snippet,\n  link: result.link,\n  source: result.displayed_link || result.link\n}));\n\n// Knowledge Graph 정보가 있다면 포함\nlet knowledgeInfo = null;\nif (serpResponse.knowledge_graph) {\n  knowledgeInfo = {\n    title: serpResponse.knowledge_graph.title,\n    description: serpResponse.knowledge_graph.description,\n    type: serpResponse.knowledge_graph.type\n  };\n}\n\n// 답변 생성\nlet answer = \"\";\n\nif (knowledgeInfo) {\n  answer += `**${knowledgeInfo.title}**\\n`;\n  if (knowledgeInfo.description) {\n    answer += `${knowledgeInfo.description}\\n\\n`;\n  }\n}\n\nanswer += \"**관련 정보:**\\n\";\nresults.forEach((result, index) => {\n  answer += `${index + 1}. **${result.title}**\\n`;\n  answer += `   ${result.snippet}\\n`;\n  answer += `   출처: ${result.source}\\n\\n`;\n});\n\nreturn {\n  success: true,\n  query: $json.body?.query || \"알 수 없음\",\n  answer: answer,\n  results: results,\n  knowledge_graph: knowledgeInfo,\n  total_results: serpResponse.search_information?.total_results || 0\n};"
+      },
+      "id": "cc62c56b-a705-4bc4-a7c0-080e62e56e4c",
+      "name": "Process Search Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        592
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        272
+      ],
+      "id": "35a10f28-07df-4376-a133-ad01979d6043",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Search Google using SerpAPI",
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "feac50f1b9efb76463d2376375e681291953ec6cb658be71b8084d5f5498ebb6"
+            },
+            {
+              "name": "q",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        352,
+        432
+      ],
+      "id": "1548de39-faee-4ba2-8e67-f89a393042d7",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }} 에 대해서 serpapi 를 활용하여 Google 검색을하여 내가 물어보는 내용에 대해서 내게 정보를 제공해줘",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        240,
+        144
+      ],
+      "id": "1e1b3d36-284c-40c4-8ff7-06360fc1dbc2",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        224,
+        352
+      ],
+      "id": "a1d77613-b405-47e0-b371-9a657007299a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "uriqsTHuzEojy9yT",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Check Query": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Process Search Results": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Check Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6f505d7a-7fd2-4413-b58c-cd06bda99b34",
+  "meta": {
+    "instanceId": "d2514d9cc26a3c03488683bfe3511d5230646815a03749f5f7f6b55087126ab1"
+  },
+  "id": "eI1i08DL0I546OYX",
+  "tags": []
+}

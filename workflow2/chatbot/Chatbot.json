@@ -1,0 +1,620 @@
+{
+  "name": "Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1024,
+        -80
+      ],
+      "id": "aae5d213-303d-4a0d-9242-53fb2c8a150d",
+      "name": "When chat message received",
+      "webhookId": "571e72eb-2db3-45f1-a371-4b55c43a8331"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f7f6ceb2-3754-4ffc-9364-d92ba882f3a4",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "pdf",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "8a33e2c8-ce91-4e25-9f9e-7b3c4d856f28",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "doc",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "37e356ff-503c-4971-9318-5c0ecfa393eb",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "docx",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "963cb36e-96a7-4a28-8e04-782d8087c01b",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "xls",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "f55e36dd-d63e-4f53-8045-cc07fc78a6a9",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "xlsx",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "47c9cb01-c032-44d2-bffd-fbce0debc6a6",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "ppt",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "005c3984-e242-42ab-bda4-24214dc1eb6d",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "pptx",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "0cde9cb4-f740-43e9-9aa7-4cb23a3ef1e4",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "txt",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "8288f100-62f4-44c5-ae8a-21ceec7ce39d",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "zip",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "d0a76e0a-50c7-4579-b9fb-7d42125ff719",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "rar",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        -80
+      ],
+      "id": "6f63a0b2-d009-44cc-8504-7c8334efd5f7",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "20d3580b-dab1-4a16-a744-6c013ad5e891",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "mp3",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "952f5df9-9bde-4f4c-a0ae-4670c4b3d350",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "wav",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "9d541f2e-a905-41e0-8f42-1d6dfadc03a9",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "mp4",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "dc2913d0-57bd-4e05-acdc-ff9852bed769",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "mov",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "f555e84a-4b53-4aa1-96fc-beb81238972d",
+              "leftValue": "{{ $json[\"fileType\"] }}",
+              "rightValue": "default",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "225d3241-2d81-4bc8-9d69-c9662c112c78",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "jpg",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "a58e5a83-a03c-495b-8e5a-6abbb401c05a",
+              "leftValue": "={{ $json[\"fileType\"] }}",
+              "rightValue": "png",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        192
+      ],
+      "id": "681c3360-5093-4fb6-be11-dd4c512ba6f1",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        352,
+        624
+      ],
+      "id": "c1a2e46f-bc1e-443a-8aeb-a30f180559da",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "uriqsTHuzEojy9yT",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        112
+      ],
+      "id": "5a999bab-7893-495d-884c-d6ca0ef1b5df",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8CY7mshUexNBMAwv",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "너는 내 개인 비서야.\n\n메일 보내달라고 요청을 한다면 메일 주소는 \"qkddudn@naver.com\"을 기본으로 사용해. 다른 메일주소를 요청하면 그 주소를 사용해.\n\n## 뉴스 요청 처리:\n\n**뉴스를 메일로 보내달라는 요청:**\n- Naver_News_Crawling_Email 함수를 호출해\n- 사용자 요청에서 키워드와 개수를 추출해서 정확히 이 형식으로 전달:\n  {\"query\":{\"input\":\"추출한키워드\",\"count\":추출한숫자},\"tool\":{\"name\":\"Naver_News_Crawling_Email\"}}\n\n**단순 뉴스 조회 요청:**\n- Naver_News_Crawling 함수를 호출해  \n- 사용자 요청에서 키워드와 개수를 추출해서 정확히 이 형식으로 전달:\n  {\"query\":{\"input\":\"추출한키워드\",\"count\":추출한숫자},\"tool\":{\"name\":\"Naver_News_Crawling\"}}\n\n## 예시:\n- \"유재석 뉴스 3개 메일로 보내줘\" → Naver_News_Crawling_Email({\"query\":{\"input\":\"유재석\",\"count\":3},\"tool\":{\"name\":\"Naver_News_Crawling_Email\"}})\n- \"삼성전자 기사 5개 보여줘\" → Naver_News_Crawling({\"query\":{\"input\":\"삼성전자\",\"count\":5},\"tool\":{\"name\":\"Naver_News_Crawling\"}})\n\n## 중요 규칙:\n- 개수가 명시되지 않으면 count는 1로 설정\n- JSON 구조를 절대 변경하지 말고 위 형식 그대로 사용\n- 키워드와 개수만 실제 값으로 교체\n\n## 기타:\n- 답변할 수 없는 내용: SerpAPI 활용\n- 최신 IT 기사: slack-news-read 활용\n\n답변 제공 전 검증 과정을 거쳐 정확한 답변 제공하기.\n복잡한 요청이나 확신이 서지 않을 때는 \"답변을 재검토해보겠습니다\"라고 말하고 재분석해서 정확한 답변 제공.\n\n## Gitlab 및 Redmine관련 요청 처리:\n\n**Gitlab 관련하여 몇건의 push 작업관련 질문 요청:**\n- n8n_gitlab_push_event_alret 함수를 호출해\n- 사용자 요청에서 만약 날짜가 언급이 되었다면, 해당 날짜에 맞는 대답을 해줘.\n\n**Gitlab 관련하여 몇건의 merge 작업 요청관련 질문 요청:**\n- n8n_gitlab_merger_request_alert 함수를 호출해\n- 사용자 요청에서 만약 날짜가 언급이 되었다면, 해당 날짜에 맞는 대답을 해줘.\n\n**Gitlab 관련하여 몇건의 merge 작업관련 질문 요청:**\n- n8n_gitlab_merge_event_alert 함수를 호출해\n- 사용자 요청에서 만약 날짜가 언급이 되었다면, 해당 날짜에 맞는 대답을 해줘.\n\n**Gitlab 및 Redmine 에 몇건의 issue관련 질문 요청:**\n- n8n_gitlab_issue-management_alert 함수를 호출해\n- 사용자 요청에서 만약 날짜가 언급이 되었다면, 해당 날짜에 맞는 대답을 해줘."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        400,
+        384
+      ],
+      "id": "5fd6408f-a954-427e-83c8-cd32318efd03",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "너는 내 개인 비서야.\n\n메일 보내달라고 요청을 한다면 메일 주소는 \"qkddudn@naver.com\"을 기본으로 사용해.\n\n## 뉴스 요청 처리 방법:\n\n**메일로 뉴스 보내달라는 요청:**\n- Naver_News_Crawling_Email 함수 호출\n- 매개변수: {\"query\":{\"input\":\"키워드\",\"count\":개수},\"tool\":{\"name\":\"Naver_News_Crawling_Email\"}}\n\n**단순 뉴스 조회 요청:**\n- Naver_News_Crawling 함수 호출  \n- 매개변수: {\"query\":{\"input\":\"키워드\",\"count\":개수},\"tool\":{\"name\":\"Naver_News_Crawling\"}}\n\n**중요 규칙:**\n1. 키워드와 개수만 추출하여 위 형식에 넣기\n2. 개수 미명시 시 count = 1\n3. JSON 구조 절대 변경 금지\n4. 함수 호출 시 정확한 매개변수 전달\n\n**기타 요청:**\n- 모르는 내용: SerpAPI 활용\n- 최신 IT 기사: slack-news-read 활용\n\n답변 제공 전 검증 과정을 거쳐 정확한 답변 제공하기.\n\n## Gitlab 및 Redmine관련 요청 처리:\n\n**Gitlab 관련하여 몇건의 push 작업관련 질문 요청:**\n- n8n_gitlab_push_event_alret 함수를 호출해\n- 사용자 요청에서 만약 날짜가 언급이 되었다면, 해당 날짜에 맞는 대답을 해줘.\n\n**Gitlab 관련하여 몇건의 merge 작업 요청관련 질문 요청:**\n- n8n_gitlab_merger_request_alert 함수를 호출해\n- 사용자 요청에서 만약 날짜가 언급이 되었다면, 해당 날짜에 맞는 대답을 해줘.\n\n**Gitlab 관련하여 몇건의 merge 작업관련 질문 요청:**\n- n8n_gitlab_merge_event_alert 함수를 호출해\n- 사용자 요청에서 만약 날짜가 언급이 되었다면, 해당 날짜에 맞는 대답을 해줘.\n\n**Gitlab 및 Redmine 에 몇건의 issue관련 질문 요청:**\n- n8n_gitlab_issue-management_alert 함수를 호출해\n- 사용자 요청에서 만약 날짜가 언급이 되었다면, 해당 날짜에 맞는 대답을 해줘."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -96
+      ],
+      "id": "addf1a77-05c1-4623-92ad-0482b7909131",
+      "name": "AI Agent1",
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$json.chatroomId}}",
+        "contextWindowLength": 5000000000000
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        640
+      ],
+      "id": "d72e9678-a101-4080-9063-bf13531854ba",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const binary = item.binary || {};\n  const binaryKeys = Object.keys(binary);\n  const hasFile = binaryKeys.length > 0;\n  const hasText = !!item.json.text;\n\n  let fileType = null;\n  if (hasFile) {\n    const mimeType = binary[binaryKeys[0]].mimeType;\n    if (mimeType.includes('pdf')) fileType = 'pdf';\n    else if (mimeType.includes('image')) fileType = 'image';\n    else fileType = 'other';\n  }\n\n  const chatroomId = item.json.chatroomId || 'defaultRoom';\n  const memoryData = item.json.chatMemory || {};\n  const isDeleteRequested = item.json.delete === true;\n\n  if (isDeleteRequested) {\n    // 삭제 요청 시 해당 채팅방 기록 삭제 (초기화)\n    memoryData[chatroomId] = [];\n    item.json.chatHistory = [];\n    // 삭제 완료 메시지 세팅\n    item.json.chatInput = \"삭제되었습니다.\";\n    item.json.sessionId = \"\";\n  }\n\n  // 필요에 따라 다른 필드 처리 가능\n\n  \n\n  return item;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        -80
+      ],
+      "id": "9a2711df-1093-4c07-bead-5b42c3a99530",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$json.chatroomId}}",
+        "contextWindowLength": 50000
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        128
+      ],
+      "id": "cd6ff68d-ebf9-4b32-a689-dc1d6be505e7",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "http://localhost:5678/mcp/0deeaf78-6cdd-4de8-8c8b-58650243f0cb/sse",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        720,
+        144
+      ],
+      "id": "d9a3be29-6f73-498d-9240-6caf222483f5",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "20262aa0-5e98-480d-b215-49698115e809",
+              "leftValue": "={{ $json[\"chatInput\"].includes(\"유튜브\") ? \"true\" : \"false\" }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "a5ce5b23-2da8-492f-9ac5-027077a925bd",
+              "leftValue": "={{ $json[\"chatInput\"].includes(\"youtu\") ? \"true\" : \"false\" }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "3a9c0958-8541-4c8c-b128-12c473e30230",
+              "leftValue": "={{ $json[\"chatInput\"].includes(\"gemini\") ? \"true\" : \"false\" }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "5ed8c38e-4c50-4ede-aa55-d79a6343ed32",
+              "leftValue": "={{ $json[\"chatInput\"].includes(\"Gemini\") ? \"true\" : \"false\" }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "ca841bf8-b885-458a-b3a4-b8322633ba4e",
+              "leftValue": "={{ $json[\"chatInput\"].includes(\"Gemini\") ? \"true\" : \"false\" }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "96ca0c7e-118b-4acc-a371-4b0665ead533",
+              "leftValue": "={{ $json[\"chatInput\"].includes(\"제미나이\") ? \"true\" : \"false\" }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -416,
+        400
+      ],
+      "id": "bb537ed8-3128-4aa7-b7ea-eb0fafcde4dd",
+      "name": "If5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "afd55888-2741-4944-83df-dd8151298a8b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d2514d9cc26a3c03488683bfe3511d5230646815a03749f5f7f6b55087126ab1"
+  },
+  "id": "XhCX4hNkA0BL8bYq",
+  "tags": []
+}

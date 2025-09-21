@@ -1,0 +1,304 @@
+{
+  "name": "Naver_News_Crawling_Email",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        480
+      ],
+      "id": "aca8e858-d0af-4f94-b331-5124d6dbc54c",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://openapi.naver.com/v1/search/news.json",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-Naver-Client-Id",
+              "value": "efISqZiIL4DG8gyLs3XY"
+            },
+            {
+              "name": "X-Naver-Client-Secret",
+              "value": "SUkHHARRq0"
+            }
+          ]
+        },
+        "queryParametersUi": {
+          "parameter": [
+            {
+              "name": "query",
+              "value": "={{ $node['Parse Input'].json.original_input.keyword }}"
+            },
+            {
+              "name": "display",
+              "value": "={{ $node['Parse Input'].json.original_input.count }}"
+            },
+            {
+              "name": "sort",
+              "value": "date"
+            }
+          ]
+        }
+      },
+      "name": "Naver News API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        480
+      ],
+      "id": "90416a83-856a-4e16-837f-749c779417bb"
+    },
+    {
+      "parameters": {
+        "functionCode": "const newsItems = $input.all()[0].json.items;\nconst originalInput = $node['Parse Input'].json.original_input;\n\nconst keyword = originalInput.keyword || '네이버';\nconst count = originalInput.count || newsItems.length;\n\nconst decodeEntities = (text) =>\n  text\n    .replace(/&quot;/g, '\"')\n    .replace(/&apos;/g, \"'\")\n    .replace(/&lt;/g, \"<\")\n    .replace(/&gt;/g, \">\")\n    .replace(/&amp;/g, \"&\");\n\nlet html = `요청하신 <strong>\"${keyword}\"</strong> 관련 기사를 찾아 보내드립니다.<br/><br/>`;\n\nif (!newsItems || newsItems.length === 0) {\n  html += `<p><strong>\"${keyword}\"</strong>에 대한 뉴스를 찾을 수 없습니다.</p>`;\n  return [{ json: { body: html, search_query: keyword, count: 0 } }];\n}\n\nnewsItems.forEach((item, index) => {\n  let title = decodeEntities(item.title.replace(/<[^>]+>/gm, ''));\n  const description = decodeEntities(item.description.replace(/<[^>]+>/gm, ''));\n  const link = item.link;\n\n  // title이 짤려있다면 description의 앞부분으로 보정\n  if (title.endsWith('…')) {\n    const firstSentence = description.split(/[.!?]\\s/)[0];\n    if (firstSentence && firstSentence.length > title.length) {\n      title = firstSentence;\n    }\n  }\n\n  html += `<strong>${index + 1}. <a href=\"${link}\" target=\"_blank\">${title}</a></strong><br/>`;\n  html += `요약내용 : ${description}<br/><br/>`;\n});\n\nreturn [{ json: { body: html, search_query: keyword, count: count } }];\n"
+      },
+      "name": "Format Email Body",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        2688,
+        480
+      ],
+      "id": "3438ddab-238a-46c7-b863-bcaa3ea95602"
+    },
+    {
+      "parameters": {
+        "fromEmail": "qkdduddn@naver.com",
+        "toEmail": "qkdduddn@naver.com",
+        "subject": "={{ '\"' + $node['Parse Input'].json.original_input.keyword + '\" 관련 뉴스 ' + $node['Parse Input'].json.original_input.count + '개' }}",
+        "text": "=",
+        "html": "={{ $node[\"AI Agent1\"].json[\"output\"] }}",
+        "options": {}
+      },
+      "name": "Send Naver Mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        3360,
+        480
+      ],
+      "id": "25a76d13-eb09-45fb-b15c-0252a8f3e10e",
+      "credentials": {
+        "smtp": {
+          "id": "DNNOWCKiUAWtJFCG",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=아래는 \"{{ $node['Parse Input'].json.original_input.keyword }}\" 관련 뉴스 {{ $node['Parse Input'].json.original_input.count }}개의 HTML 형식 데이터입니다.\n\n각 뉴스 항목을 다음 형식으로 요약해 주세요:\n\n\"{{ $node['Parse Input'].json.original_input.keyword }}\" 관련 뉴스 {{ $node['Parse Input'].json.original_input.count }}개 요약해드립니다.<br><br>\n\n번호. <a href=\"기사 링크\" target=\"_blank\">기사 제목</a><br>\n요약 내용: 뉴스의 핵심 내용을 두 문장 이내로 간결하게 요약<br><br>\n\n조건:\n- 뉴스 본문에서 핵심 내용만 추려 짧고 명확하게 요약하세요.\n- 각 뉴스 항목 사이에는 빈 줄 한 줄을 추가해 구분하세요.\n- HTML 태그 형식 및 줄바꿈(`<br>`)은 반드시 유지하세요.\n- 각 링크 앞 번호가 메일의 고유 번호입니다. 번호로 구분해주세요. \n- \"{{ $node['Parse Input'].json.original_input.keyword }}\"와 관련된 내용을 중심으로 요약하세요.\n- 기사 제목은 실제 기사 제목 전체로 보여져야합니다. 기사 제목이 짤리거나 하면 안됩니다.\n\n아래는 요약할 뉴스 HTML입니다:\n{{ $json.body }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        2992,
+        -160
+      ],
+      "id": "fc1f0bda-b05d-4ca6-ad14-fad865ed4a37",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2992,
+        64
+      ],
+      "id": "61ed2f41-dcb6-4bc4-93be-dff975d622a4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8CY7mshUexNBMAwv",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// MCP에서 받은 전체 입력 데이터 확인\nconst input = $input.first().json;\nconsole.log('Complete input received:', JSON.stringify(input));\n\n// 다양한 input 경로에서 전체 텍스트 추출\nlet fullText = '';\nlet count = 10;\n\n// MCP에서 올 수 있는 다양한 형태의 입력 처리\nif (input.body && input.body.input) {\n  fullText = input.body.input;\n} else if (input.input) {\n  fullText = input.input;\n} else if (input.query) {\n  fullText = input.query;\n} else if (input.message) {\n  fullText = input.message;\n} else if (input.text) {\n  fullText = input.text;\n} else if (typeof input === 'string') {\n  fullText = input;\n} else if (input.body && typeof input.body === 'string') {\n  fullText = input.body;\n} else {\n  // 혹시 다른 필드에 있는지 확인\n  const possibleFields = ['prompt', 'content', 'request', 'data'];\n  for (const field of possibleFields) {\n    if (input[field]) {\n      fullText = input[field];\n      break;\n    }\n  }\n}\n\nconsole.log('Extracted fullText:', fullText);\n\nif (!fullText) {\n  console.log('No text found in input, using default');\n  fullText = '네이버';\n}\n\n// 이제 전체 텍스트에서 검색어와 개수 파싱\nlet search_query = fullText;\n\n// 개수 추출 (다양한 패턴)\nconst countPatterns = [\n  /(\\d+)개/,\n  /(\\d+)건/,\n  /top\\s*(\\d+)/i,\n  /(\\d+)\\s*개/,\n  /^(\\d+)/\n];\n\nfor (const pattern of countPatterns) {\n  const match = fullText.match(pattern);\n  if (match) {\n    count = parseInt(match[1]);\n    break;\n  }\n}\n\n// 검색어 추출 (불필요한 단어들 제거)\nsearch_query = fullText\n  .replace(/\\d+개.*?/g, '')\n  .replace(/\\d+건.*?/g, '')\n  .replace(/top\\s*\\d+.*?/ig, '')\n  .replace(/관련.*?기사/g, '')\n  .replace(/기사.*?보내/g, '')\n  .replace(/뉴스.*?보내/g, '')\n  .replace(/크롤링.*?/g, '')\n  .replace(/보내줘|해줘|가져와|검색|찾아/g, '')\n  .replace(/관련|기사|뉴스/g, '')\n  .trim();\n\n// 빈 검색어 방지\nif (!search_query) {\n  search_query = '네이버';\n}\n\nconsole.log('Final parsed - search_query:', search_query, 'count:', count);\n\nreturn [{\n  json: {\n    search_query: search_query,\n    count: count,\n    original_input: input,\n    full_text: fullText\n  }\n}];"
+      },
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        480
+      ],
+      "id": "1474826f-e5bc-424c-bcd4-2bbd76472e7d"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// query에 담긴 문자열을 JSON으로 파싱\nlet parsed = {};\nif (typeof input.query === 'string') {\n  try {\n    parsed = JSON.parse(input.query);  // 문자열 → JSON 객체\n  } catch (e) {\n    throw new Error('query 내부 문자열 파싱 실패: ' + e.message);\n  }\n} else {\n  parsed = input.query;  // 이미 파싱된 경우\n}\n\n// 개별 요소 추출\nconst keyword = parsed.query.input;\nconst count = parsed.query.count;\nconst toolName = parsed.tool.name;\n\n// 예시 출력\nreturn {\n  keyword,\n  count,\n  toolName,\n  original: parsed\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        480
+      ],
+      "id": "e184c945-bb54-4337-9633-cd20f2ea5610",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2928,
+        704
+      ],
+      "id": "6ae9ce1a-a902-430a-8ddb-11ce530a964e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "uriqsTHuzEojy9yT",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=당신은 뉴스 요약 전문가입니다. 아래 \"{{ $node['Parse Input'].json.original_input.keyword }}\" 관련 뉴스 {{ $node['Parse Input'].json.original_input.count }}개의 HTML 데이터를 정확히 요약해주세요.\n\n**요약 규칙:**\n1. 각 뉴스를 다음 형식으로 정리하세요:\n   번호. <a href=\"기사 링크\" target=\"_blank\">기사 제목</a><br>\n   요약 내용: 핵심 내용을 2문장 이내로 간결하게 요약<br><br>\n\n2. **반드시 지켜야 할 조건:**\n   - HTML 태그와 줄바꿈 태그(<br>)를 정확히 유지하세요\n   - 기사 제목은 원문 그대로 전체를 표시하세요 (절대 생략하지 마세요)\n   - 각 뉴스 항목 사이에 <br><br> 태그로 구분하세요\n   - \"{{ $node['Parse Input'].json.original_input.keyword }}\"와 직접 관련된 핵심 내용만 요약하세요\n   - 링크 URL과 기사 번호는 절대 변경하지 마세요\n\n3. **요약 스타일:**\n   - 객관적이고 사실적으로 작성하세요\n   - 중요한 수치, 날짜, 인물명은 정확히 포함하세요\n   - 추측이나 개인적 의견은 제외하세요\n\n**첫 줄:** \"{{ $node['Parse Input'].json.original_input.keyword }}\" 관련 뉴스 {{ $node['Parse Input'].json.original_input.count }}개 요약해드립니다.<br><br>\n\n**요약할 뉴스 데이터:**\n{{ $json.body }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        2944,
+        480
+      ],
+      "id": "e115f823-c099-4439-aa08-5027a3168c92",
+      "name": "AI Agent1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email Body": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Naver News API": {
+      "main": [
+        [
+          {
+            "node": "Format Email Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Input": {
+      "main": [
+        [
+          {
+            "node": "Naver News API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Parse Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send Naver Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ce97bdd6-b5b3-4c4b-a211-09657fb711f3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d2514d9cc26a3c03488683bfe3511d5230646815a03749f5f7f6b55087126ab1"
+  },
+  "id": "Xi7f3pMAuY6qrSki",
+  "tags": []
+}
